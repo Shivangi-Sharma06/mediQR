@@ -39,7 +39,7 @@ const AdminDashboard: React.FC = () => {
   return (
     <div className="container mx-auto animate-fade-in">
       <div className="flex flex-col items-start mb-8">
-        <h1 className="text-3xl font-bold mb-2">Welcome to MediChain</h1>
+        <h1 className="text-3xl font-bold mb-2">Welcome to mediQR</h1>
         <p className="text-muted-foreground">
           Dashboard overview of your blockchain medicine authentication system
         </p>

@@ -11,7 +11,6 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import MedicineEntry from "./pages/admin/MedicineEntry";
 import QRGeneration from "./pages/admin/QRGeneration";
 import SearchMedicines from "./pages/admin/SearchMedicines";
-import Notifications from "./pages/admin/Notifications";
 import NotFound from "./pages/NotFound";
 import { useAppStore } from "./store";
 
@@ -58,7 +57,6 @@ const App = () => {
               <Route path="medicine-entry" element={<MedicineEntry />} />
               <Route path="qr-generation" element={<QRGeneration />} />
               <Route path="search" element={<SearchMedicines />} />
-              <Route path="notifications" element={<Notifications />} />
             </Route>
             
             {/* User routes */}
