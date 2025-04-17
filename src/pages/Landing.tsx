@@ -28,7 +28,7 @@ const Landing: React.FC = () => {
       <div className="flex-1 container mx-auto flex flex-col items-center justify-center px-4 relative z-10">
         <div className="max-w-3xl mx-auto text-center">
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 text-gradient animate-fade-in">
-            MediChain
+            mediQR
           </h1>
           <p className="text-xl mb-10 text-muted-foreground animate-fade-in delay-200">
             Blockchain-based medicine authentication system to verify medicine authenticity and combat counterfeiting
@@ -39,14 +39,14 @@ const Landing: React.FC = () => {
               onClick={() => handleLogin('admin')} 
               className="px-8 py-6 text-lg bg-gradient-to-r from-primary/80 to-accent/80 hover:from-primary hover:to-accent"
             >
-              Enter Admin Dashboard
+              Admin Dashboard
             </Button>
             <Button 
               onClick={() => handleLogin('user')} 
               variant="outline"
               className="px-8 py-6 text-lg border-white/20 hover:bg-white/10"
             >
-              Enter User Dashboard
+              User Dashboard
             </Button>
           </div>
         </div>
@@ -56,9 +56,9 @@ const Landing: React.FC = () => {
             <div className="h-12 w-12 rounded-full bg-primary/20 flex items-center justify-center mb-4">
               <Database size={24} className="text-primary" />
             </div>
-            <h3 className="text-lg font-semibold mb-2">Blockchain Security</h3>
+            <h3 className="text-lg font-semibold mb-2"> Real-World Usage</h3>
             <p className="text-sm text-muted-foreground">
-              Immutable record-keeping for all medicine data ensures tamper-proof authentication
+            MediQR helps verify the authenticity of medicines using blockchain and QR codes.
             </p>
           </div>
           

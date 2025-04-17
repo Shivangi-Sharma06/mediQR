@@ -22,18 +22,7 @@ const AdminDashboard: React.FC = () => {
       icon: <QrCode className="h-5 w-5 text-primary" />,
       href: '/admin/qr-generation',
     },
-    {
-      title: 'Expired Medicines',
-      value: medicines.filter(m => m.expired).length,
-      icon: <Search className="h-5 w-5 text-primary" />,
-      href: '/admin/search',
-    },
-    {
-      title: 'Transactions',
-      value: transactions.length,
-      icon: <Bell className="h-5 w-5 text-primary" />,
-      href: '/admin/notifications',
-    },
+    
   ];
   
   return (
@@ -45,7 +34,8 @@ const AdminDashboard: React.FC = () => {
         </p>
       </div>
       
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4 mb-8">
+
         {stats.map((stat, index) => (
           <Link 
             key={stat.title} 
@@ -107,10 +97,20 @@ const AdminDashboard: React.FC = () => {
             <li className="flex items-start">
               <span className="h-6 w-6 rounded-full bg-primary/20 text-primary flex items-center justify-center mr-3 flex-shrink-0">4</span>
               <div>
-                <h3 className="font-medium">Monitor Transactions</h3>
-                <p className="text-sm text-muted-foreground">Track blockchain transactions in the Notifications page</p>
+                <h3 className="font-medium">Scan & Compare QR</h3>
+                <p className="text-sm text-muted-foreground">Scan the QR code to verify product data in real-time.</p>
               </div>
             </li>
+            <li className="flex items-start">
+              <span className="h-6 w-6 rounded-full bg-primary/20 text-primary flex items-center justify-center mr-3 flex-shrink-0">5</span>
+              <div>
+                <h3 className="font-medium">Raise a Flag</h3>
+                <p className="text-sm text-muted-foreground">If data doesn’t match:
+🔴 Red = FAKE
+🟢 Green = AUTHENTIC</p>
+              </div>
+            </li>
+           
           </ol>
         </div>
       </div>

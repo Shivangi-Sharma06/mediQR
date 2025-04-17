@@ -21,7 +21,7 @@ const formSchema = z.object({
   expiryDate: z.date({
     required_error: "Expiry date is required",
   }),
-  manufacturer: z.string().min(1, "Manufacturer name is required"),
+  manufacturerAddress: z.string().min(1, "Manufacturer address is required"),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -37,7 +37,7 @@ const MedicineEntry: React.FC = () => {
     defaultValues: {
       name: '',
       batchNumber: '',
-      manufacturer: '',
+      manufacturerAddress: '',
     }
   });
   
@@ -63,7 +63,8 @@ const MedicineEntry: React.FC = () => {
         name: data.name,
         batchNumber: data.batchNumber,
         expiryDate: data.expiryDate,
-        manufacturer: data.manufacturer,
+        manufacturer: data.manufacturerAddress,
+
       });
       
       toast({
@@ -167,23 +168,24 @@ const MedicineEntry: React.FC = () => {
               )}
             </div>
             
-            <div className="space-y-2">
-              <label htmlFor="manufacturer" className="text-sm font-medium">
-                Manufacturer Name
-              </label>
-              <Input
-                id="manufacturer"
-                className={cn(
-                  "bg-white/5 border-white/10 focus:border-primary",
-                  errors.manufacturer && "border-red-500 focus:border-red-500"
-                )}
-                placeholder="Enter manufacturer name"
-                {...register("manufacturer")}
-              />
-              {errors.manufacturer && (
-                <p className="text-red-500 text-xs mt-1">{errors.manufacturer.message}</p>
-              )}
-            </div>
+            <div className="space-y-2"> 
+  <label htmlFor="manufacturerAddress" className="text-sm font-medium">
+    Manufacturer Address
+  </label>
+  <Input
+    id="manufacturerAddress"
+    className={cn(
+      "bg-white/5 border-white/10 focus:border-primary",
+      errors.manufacturerAddress && "border-red-500 focus:border-red-500"
+    )}
+    placeholder="Enter manufacturer address"
+    {...register("manufacturerAddress")}
+  />
+  {errors.manufacturerAddress && (
+    <p className="text-red-500 text-xs mt-1">{errors.manufacturerAddress.message}</p>
+  )}
+</div>
+
             
             <Button 
               type="submit" 
