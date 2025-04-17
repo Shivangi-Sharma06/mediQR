@@ -13,7 +13,6 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 import { CalendarIcon, Loader2 } from 'lucide-react';
-import { QRCodeCanvas } from 'qrcode.react'; // Import QRCodeCanvas
 
 const formSchema = z.object({
   name: z.string().min(1, "Medicine name is required"),
@@ -31,7 +30,6 @@ const MedicineEntry: React.FC = () => {
   const navigate = useNavigate();
   const addMedicine = useAppStore(state => state.addMedicine);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [qrCodeData, setQrCodeData] = useState<string | null>(null); // State for QR code data
   
   const { register, handleSubmit, formState: { errors }, setValue, watch } = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -45,8 +43,19 @@ const MedicineEntry: React.FC = () => {
   const selectedDate = watch('expiryDate');
 
   const onSubmit = async (data: FormData) => {
-    setIsSubmitting(true);
+    // Don't submit if wallet not connected
+    const isConnected = useAppStore.getState().wallet.isConnected;
+    if (!isConnected) {
+      toast({
+        title: "Wallet Not Connected",
+        description: "Please connect your wallet to submit medicine data.",
+        variant: "destructive",
+      });
+      return;
+    }
 
+    setIsSubmitting(true);
+    
     try {
       // Add the new medicine to the store
       const newMedicine = await addMedicine({
@@ -54,22 +63,14 @@ const MedicineEntry: React.FC = () => {
         batchNumber: data.batchNumber,
         expiryDate: data.expiryDate,
         manufacturer: data.manufacturerAddress,
-      });
 
-      // Generate QR code data
-      const qrData = JSON.stringify({
-        name: data.name,
-        batchNumber: data.batchNumber,
-        expiryDate: format(data.expiryDate, 'yyyy-MM-dd'),
-        manufacturerAddress: data.manufacturerAddress,
       });
-      setQrCodeData(qrData); // Set QR code data
-
+      
       toast({
         title: "Medicine Added",
         description: "The medicine has been successfully added to the system.",
       });
-
+      
       // Redirect to the QR generation page with the new medicine ID
       navigate(`/admin/qr-generation?id=${newMedicine.id}`);
     } catch (error) {
@@ -167,23 +168,24 @@ const MedicineEntry: React.FC = () => {
             </div>
             
             <div className="space-y-2"> 
-              <label htmlFor="manufacturerAddress" className="text-sm font-medium">
-                Manufacturer Address
-              </label>
-              <Input
-                id="manufacturerAddress"
-                className={cn(
-                  "bg-white/5 border-white/10 focus:border-primary",
-                  errors.manufacturerAddress && "border-red-500 focus:border-red-500"
-                )}
-                placeholder="Enter manufacturer address"
-                {...register("manufacturerAddress")}
-              />
-              {errors.manufacturerAddress && (
-                <p className="text-red-500 text-xs mt-1">{errors.manufacturerAddress.message}</p>
-              )}
-            </div>
+  <label htmlFor="manufacturerAddress" className="text-sm font-medium">
+    Manufacturer Address
+  </label>
+  <Input
+    id="manufacturerAddress"
+    className={cn(
+      "bg-white/5 border-white/10 focus:border-primary",
+      errors.manufacturerAddress && "border-red-500 focus:border-red-500"
+    )}
+    placeholder="Enter manufacturer address"
+    {...register("manufacturerAddress")}
+  />
+  {errors.manufacturerAddress && (
+    <p className="text-red-500 text-xs mt-1">{errors.manufacturerAddress.message}</p>
+  )}
+</div>
 
+            
             <Button 
               type="submit" 
               className="w-full bg-gradient-to-r from-primary/80 to-accent/80 hover:from-primary hover:to-accent"
@@ -200,14 +202,6 @@ const MedicineEntry: React.FC = () => {
             </Button>
           </div>
         </form>
-
-        {/* QR Code Display */}
-        {qrCodeData && (
-          <div className="mt-6 text-center">
-            <h2 className="text-lg font-medium mb-4">Generated QR Code</h2>
-            <QRCodeCanvas value={qrCodeData} size={200} />
-          </div>
-        )}
       </Card>
     </div>
   );
