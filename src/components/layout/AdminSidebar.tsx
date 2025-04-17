@@ -60,21 +60,7 @@ const AdminSidebar: React.FC = () => {
                 }
               `}
             >
-              <Database size={18} />
-              <span>QR Generation</span>
-            </NavLink>
-          </li>
-          <li>
-            <NavLink
-              to="/admin/search"
-              className={({ isActive }) => `
-                flex items-center gap-2 p-2 rounded-md transition-all
-                ${isActive 
-                  ? 'bg-primary/20 text-primary font-medium' 
-                  : 'hover:bg-secondary text-foreground/70 hover:text-foreground'
-                }
-              `}
-            >
+             
               <Search size={18} />
               <span>Search Medicines</span>
             </NavLink>

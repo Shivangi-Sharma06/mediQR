@@ -58,8 +58,7 @@ const App = () => {
               <Route 
                 path="qr-generation" 
                 element={
-                  <QRGeneration 
-                    qrCodeData={null} 
+                  <QRGeneration  
                     medicine={null} 
                     onUpload={async () => {}} 
                     isUploading={false} 
