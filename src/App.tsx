@@ -55,7 +55,17 @@ const App = () => {
             >
               <Route index element={<AdminDashboard />} />
               <Route path="medicine-entry" element={<MedicineEntry />} />
-              <Route path="qr-generation" element={<QRGeneration />} />
+              <Route 
+                path="qr-generation" 
+                element={
+                  <QRGeneration 
+                    qrCodeData={null} 
+                    medicine={null} 
+                    onUpload={async () => {}} 
+                    isUploading={false} 
+                  />
+                } 
+              />
               <Route path="search" element={<SearchMedicines />} />
             </Route>
             

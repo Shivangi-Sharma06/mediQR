@@ -2,7 +2,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import type { Medicine } from '@/types';
 
-export interface QRDisplayProps {
+interface QRDisplayProps {
   qrCodeData: string;
   medicine: Medicine;
   onUpload: () => Promise<void>;

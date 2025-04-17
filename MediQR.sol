@@ -1,8 +1,5 @@
 // SPDX-License-Identifier: MIT
 
-
-// this is for admin dashboard
-
 pragma solidity ^0.8.0;
 
 contract MediQR {
@@ -47,11 +44,6 @@ contract MediQR {
 
         emit MedicineAdded(_batchNo, msg.sender, _qrCID, block.timestamp);
     }
-
-
-
-    
-// this is for user dashboard
 
     /// @notice Get all data for a batch
     function getMedicine(string memory _batchNo) public view returns (
