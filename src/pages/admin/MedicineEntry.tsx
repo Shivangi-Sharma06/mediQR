@@ -12,15 +12,18 @@ import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 import { CalendarIcon, Loader2 } from 'lucide-react';
 import { QRDisplay } from '@/components/ui/qr-display';
+import { create } from 'ipfs-http-client';
+
 
 type Medicine = {
   id: string; // Unique identifier
-  createdAt: string; // ISO format string
+  createdAt: Date; // Date object
   name: string;
   batchNumber: string;
   expiryDate: string; // ISO format string
   manufacturer: string;
   qrCode: string; // Base64 or URL for the QR code
+  ipfsHash?: string; // IPFS hash for the QR code
 };
 
 const formSchema = z.object({
@@ -60,21 +63,25 @@ const MedicineEntry: React.FC = () => {
 
     const qrCodeData = `Name: ${data.name}\nBatch: ${data.batchNumber}`;
     const qrCodeUrl = await generateQRCode(qrCodeData); // Generate QR code URL
+
+    const ipfsHash = await uploadToIPFS(qrCodeUrl); // Upload QR code to IPFS
+
     const medicineData: Medicine = {
       id: crypto.randomUUID(), // Generate a unique ID
-      createdAt: new Date().toISOString(), // Current timestamp
+      createdAt: new Date(), // Current timestamp
       name: data.name,
       batchNumber: data.batchNumber,
       expiryDate: data.expiryDate.toISOString(),
       manufacturer: data.manufacturerAddress,
       qrCode: qrCodeUrl,
+      ipfsHash, // Store the IPFS hash
     };
 
     setSubmittedMedicine(medicineData);
 
     toast({
       title: "Medicine Submitted",
-      description: "QR Code generated below.",
+      description: "QR Code generated and uploaded to IPFS.",
     });
 
     reset();
@@ -84,6 +91,22 @@ const MedicineEntry: React.FC = () => {
   const generateQRCode = async (data: string): Promise<string> => {
     const QRCode = await import('qrcode');
     return QRCode.toDataURL(data);
+  };
+
+  const uploadToIPFS = async (qrCode: string): Promise<string> => {
+    try {
+      const client = create({ url: 'https://ipfs.infura.io:5001/api/v0' }); // Connect to IPFS
+      const result = await client.add(qrCode); // Upload QR code to IPFS
+      return result.path; // Return the IPFS hash
+    } catch (error) {
+      console.error("Error uploading to IPFS:", error);
+      toast({
+        title: "IPFS Upload Failed",
+        description: "An error occurred while uploading the QR code to IPFS.",
+        variant: "destructive",
+      });
+      throw error;
+    }
   };
 
   return (
@@ -185,7 +208,7 @@ const MedicineEntry: React.FC = () => {
         {/* QR Code Section */}
         {submittedMedicine && (
           <div className="mt-10">
-            <QRDisplay medicine={{ ...submittedMedicine, expiryDate: new Date(submittedMedicine.expiryDate), createdAt: new Date(submittedMedicine.createdAt) }} />
+            <QRDisplay medicine={{ ...submittedMedicine, expiryDate: new Date(submittedMedicine.expiryDate) }} />
           </div>
         )}
       </Card>
