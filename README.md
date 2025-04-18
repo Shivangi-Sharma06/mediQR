@@ -63,7 +63,7 @@ To create a blockchain-powered, QR-based verification system that ensures authen
 - Hardhat  
 - ERC-1155 Standard for metadata
 ###  Backend:
-- Node.js  
+- fireBase
 
 ### Database: 
 - Firebase   
