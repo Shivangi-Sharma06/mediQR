@@ -11,17 +11,18 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 import { CalendarIcon, Loader2 } from 'lucide-react';
-import QRDisplay from './QRGeneration'; // 👈 Make sure this path is correct
+import { QRDisplay } from '@/components/ui/qr-display';
 
-// Define the medicine type
 type Medicine = {
+  id: string; // Unique identifier
+  createdAt: string; // ISO format string
   name: string;
   batchNumber: string;
   expiryDate: string; // ISO format string
   manufacturer: string;
+  qrCode: string; // Base64 or URL for the QR code
 };
 
-// Zod schema for form validation
 const formSchema = z.object({
   name: z.string().min(1, "Medicine name is required"),
   batchNumber: z.string().min(1, "Batch number is required"),
@@ -57,11 +58,16 @@ const MedicineEntry: React.FC = () => {
   const onSubmit = async (data: FormData) => {
     setIsSubmitting(true);
 
+    const qrCodeData = `Name: ${data.name}\nBatch: ${data.batchNumber}`;
+    const qrCodeUrl = await generateQRCode(qrCodeData); // Generate QR code URL
     const medicineData: Medicine = {
+      id: crypto.randomUUID(), // Generate a unique ID
+      createdAt: new Date().toISOString(), // Current timestamp
       name: data.name,
       batchNumber: data.batchNumber,
       expiryDate: data.expiryDate.toISOString(),
       manufacturer: data.manufacturerAddress,
+      qrCode: qrCodeUrl,
     };
 
     setSubmittedMedicine(medicineData);
@@ -73,6 +79,11 @@ const MedicineEntry: React.FC = () => {
 
     reset();
     setIsSubmitting(false);
+  };
+
+  const generateQRCode = async (data: string): Promise<string> => {
+    const QRCode = await import('qrcode');
+    return QRCode.toDataURL(data);
   };
 
   return (
@@ -174,11 +185,7 @@ const MedicineEntry: React.FC = () => {
         {/* QR Code Section */}
         {submittedMedicine && (
           <div className="mt-10">
-            <QRDisplay
-              medicine={submittedMedicine}
-              isUploading={false}
-              onUpload={async () => alert('Fake upload triggered')}
-            />
+            <QRDisplay medicine={{ ...submittedMedicine, expiryDate: new Date(submittedMedicine.expiryDate), createdAt: new Date(submittedMedicine.createdAt) }} />
           </div>
         )}
       </Card>

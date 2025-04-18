@@ -1,156 +1,82 @@
-
-import React, { useState, useRef } from 'react';
-import { Camera, X, ScanLine } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { useToast } from '@/hooks/use-toast';
+import React, { useEffect, useRef } from 'react';
+import { Html5Qrcode } from 'html5-qrcode';
 
 interface QRScannerProps {
   onScan: (result: string) => void;
   isScanning: boolean;
-  setIsScanning: (scanning: boolean) => void;
+  setIsScanning: (value: boolean) => void;
 }
 
-export const QRScanner: React.FC<QRScannerProps> = ({ 
+export const QRScanner: React.FC<QRScannerProps> = ({
   onScan,
   isScanning,
   setIsScanning,
 }) => {
-  const { toast } = useToast();
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [hasPermission, setHasPermission] = useState<boolean | null>(null);
-  const [cameraError, setCameraError] = useState<string | null>(null);
+  const qrRef = useRef<HTMLDivElement>(null);
+  const html5QrCodeRef = useRef<Html5Qrcode | null>(null);
 
-  // Simulated QR scan since we can't actually scan in this environment
-  const simulateScan = () => {
-    // In a real implementation, you would scan the QR code from the video stream
-    toast({
-      title: "QR Code Detected",
-      description: "Processing the detected QR code...",
-    });
-    
-    setTimeout(() => {
-      const simulatedQRData = `MED_${Math.random().toString(36).substring(2, 8)}`;
-      onScan(simulatedQRData);
-      setIsScanning(false);
-    }, 1500);
-  };
+  useEffect(() => {
+    if (!isScanning) return;
 
-  // In a real implementation, this would start the camera and begin scanning
-  const startScanning = async () => {
-    setCameraError(null);
-    
-    try {
-      // Simulate camera permission request
-      setHasPermission(true);
-      
-      // In a real app, you'd do something like this:
-      // const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-      // if (videoRef.current) {
-      //   videoRef.current.srcObject = stream;
-      //   videoRef.current.play();
-      // }
-      
-      // After a delay, simulate a successful scan
-      setTimeout(simulateScan, 3000);
-    } catch (error) {
-      console.error('Error accessing camera:', error);
-      setCameraError('Could not access the camera. Please check permissions.');
-      setHasPermission(false);
-      toast({
-        title: "Camera Access Failed",
-        description: "Could not access your camera. Please check permissions.",
-        variant: "destructive",
+    const qrRegionId = "qr-scanner";
+    const qrCode = new Html5Qrcode(qrRegionId);
+    html5QrCodeRef.current = qrCode;
+
+    qrCode
+      .start(
+        { facingMode: "environment" },
+        { fps: 10, qrbox: 250 },
+        (decodedText) => {
+          onScan(decodedText);
+          setIsScanning(false);
+          qrCode.stop().then(() => qrCode.clear());
+        },
+        (error) => console.warn("QR scan error", error)
+      )
+      .catch((err) => {
+        console.error("Camera error", err);
+        setIsScanning(false);
       });
-    }
-  };
 
-  const stopScanning = () => {
-    // In a real app, you'd do something like this:
-    // if (videoRef.current && videoRef.current.srcObject) {
-    //   const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
-    //   tracks.forEach(track => track.stop());
-    //   videoRef.current.srcObject = null;
-    // }
-    setIsScanning(false);
-  };
-
-  React.useEffect(() => {
-    if (isScanning) {
-      startScanning();
-    } else {
-      stopScanning();
-    }
-    
     return () => {
-      stopScanning();
+      qrCode
+        .stop()
+        .then(() => qrCode.clear())
+        .catch((err) => console.warn("Stop failed", err));
     };
   }, [isScanning]);
 
+  const handleStopScanning = () => {
+    if (html5QrCodeRef.current) {
+      html5QrCodeRef.current
+        .stop()
+        .then(() => {
+          html5QrCodeRef.current?.clear();
+          setIsScanning(false);
+        })
+        .catch((err) => console.warn("Stop failed", err));
+    }
+  };
+
   return (
-    <div className="relative w-full max-w-md mx-auto">
-      <div className={`
-        aspect-square rounded-lg overflow-hidden relative 
-        ${isScanning ? 'border-2 border-primary' : 'bg-black/20'}
-      `}>
-        {isScanning ? (
-          <>
-            {/* Video would go here in a real implementation */}
-            <div className="absolute inset-0 bg-black/80 flex items-center justify-center">
-              <div className="relative w-3/4 h-3/4 border-2 border-primary/50 rounded-lg">
-                {/* Corner markers */}
-                <div className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-primary"></div>
-                <div className="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 border-primary"></div>
-                <div className="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 border-primary"></div>
-                <div className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-primary"></div>
-                
-                {/* Scan line animation */}
-                <div className="absolute inset-0 overflow-hidden">
-                  <div className="h-0.5 w-full bg-primary/70 animate-[scan_2s_ease-in-out_infinite]"></div>
-                </div>
-                
-                {/* Invisible video element */}
-                <video 
-                  ref={videoRef}
-                  className="absolute inset-0 w-full h-full object-cover opacity-0"
-                  playsInline
-                  muted
-                />
-              </div>
-              <ScanLine className="absolute inset-0 w-full h-full text-primary animate-pulse opacity-50" />
-            </div>
-            <div className="absolute bottom-4 left-0 right-0 text-center text-sm text-primary animate-pulse">
-              Scanning for QR code...
-            </div>
-          </>
-        ) : (
-          <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6">
-            <Camera size={48} className="mb-4 text-muted-foreground" />
-            <h3 className="text-lg font-medium mb-2">Scan Medicine QR Code</h3>
-            <p className="text-sm text-muted-foreground mb-4">
-              Position the QR code within the scanner to verify the medicine authenticity
-            </p>
-            <Button
-              onClick={() => setIsScanning(true)}
-              className="bg-gradient-to-r from-primary/80 to-accent/80 hover:from-primary hover:to-accent"
-            >
-              Start Scanning
-            </Button>
-            {cameraError && (
-              <p className="mt-4 text-sm text-red-400">{cameraError}</p>
-            )}
-          </div>
-        )}
-      </div>
-      
-      {isScanning && (
-        <Button 
-          variant="outline" 
-          size="sm" 
-          className="absolute top-2 right-2 h-8 w-8 p-0 rounded-full bg-black/50"
-          onClick={() => setIsScanning(false)}
+    <div className="w-full flex flex-col justify-center items-center">
+      {isScanning ? (
+        <>
+          <div id="qr-scanner" ref={qrRef} className="w-full max-w-xs aspect-square mb-4" />
+          <button
+            className="px-4 py-2 bg-red-500 text-white rounded-md"
+            onClick={handleStopScanning}
+          >
+            Stop Scanning
+          </button>
+        </>
+      ) : (
+        <button
+          className="px-4 py-2 bg-primary text-white rounded-md"
+          onClick={() => setIsScanning(true)}
         >
-          <X size={16} />
-        </Button>
+          Start QR Scan
+        </button>
       )}
     </div>
   );

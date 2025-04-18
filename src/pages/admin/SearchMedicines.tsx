@@ -1,154 +1,60 @@
-
 import React, { useState } from 'react';
-import { useAppStore } from '@/store';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Search, Copy, Eye, AlertTriangle } from 'lucide-react';
-import { DataTable } from '@/components/ui/data-table';
-import { useToast } from '@/hooks/use-toast';
-import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 
 const SearchMedicines: React.FC = () => {
-  const { toast } = useToast();
-  const navigate = useNavigate();
-  const searchMedicines = useAppStore(state => state.searchMedicines);
-  const tagAsExpired = useAppStore(state => state.tagAsExpired);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [results, setResults] = useState<ReturnType<typeof searchMedicines>>([]);
-  
-  const handleSearch = () => {
-    const searchResults = searchMedicines(searchQuery);
-    setResults(searchResults);
-  };
-  
-  const handleCopyIPFS = (ipfsHash: string) => {
-    navigator.clipboard.writeText(ipfsHash);
-    toast({
-      title: 'IPFS Hash Copied',
-      description: 'IPFS hash has been copied to clipboard.',
-    });
-  };
-  
-  const handleViewQR = (medicineId: string) => {
-    navigate(`/admin/qr-generation?id=${medicineId}`);
-  };
-  
-  const handleTagExpired = (medicineId: string) => {
-    tagAsExpired(medicineId);
-    toast({
-      title: 'Medicine Tagged',
-      description: 'Medicine has been tagged as expired.',
-    });
-    
-    // Update the results
-    const updatedResults = results.map(medicine => {
-      if (medicine.id === medicineId) {
-        return { ...medicine, expired: true };
-      }
-      return medicine;
-    });
-    
-    setResults(updatedResults);
-  };
-
-  const columns = [
+  // Hardcoded data
+  const hardcodedData = [
     {
-      accessorKey: 'name',
-      header: 'Medicine Name',
+      id: '1',
+      name: 'Paracetamol',
+      batchNumber: '12345',
+      expiryDate: '2025-12-31',
+      ipfsHash: 'Qm123abc456def',
+      expired: false,
     },
     {
-      accessorKey: 'batchNumber',
-      header: 'Batch Number',
+      id: '2',
+      name: 'Ibuprofen',
+      batchNumber: '67890',
+      expiryDate: '2023-10-15',
+      ipfsHash: 'Qm789ghi012jkl',
+      expired: true,
     },
     {
-      accessorKey: 'expiryDate',
-      header: 'Expiry Date',
-      cell: ({ row }: any) => {
-        const date = new Date(row.original.expiryDate);
-        const isExpired = date < new Date();
-        
-        return (
-          <div className="flex items-center">
-            <span>{format(date, 'MMM d, yyyy')}</span>
-            {isExpired && (
-              <span className="ml-2 px-2 py-0.5 text-xs rounded bg-red-500/20 text-red-400">
-                Expired
-              </span>
-            )}
-          </div>
-        );
-      },
-    },
-    {
-      accessorKey: 'ipfsHash',
-      header: 'IPFS Hash',
-      cell: ({ row }: any) => {
-        const ipfsHash = row.original.ipfsHash;
-        
-        return ipfsHash ? (
-          <div className="flex items-center">
-            <span className="truncate max-w-[140px]">{ipfsHash}</span>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => handleCopyIPFS(ipfsHash)}
-              className="ml-1 h-6 w-6"
-            >
-              <Copy size={12} />
-            </Button>
-          </div>
-        ) : (
-          <span className="text-muted-foreground">Not uploaded</span>
-        );
-      },
-    },
-    {
-      id: 'actions',
-      header: 'Actions',
-      cell: ({ row }: any) => {
-        const medicine = row.original;
-        const isExpired = new Date(medicine.expiryDate) < new Date();
-        
-        return (
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => handleViewQR(medicine.id)}
-              className="h-8"
-            >
-              <Eye size={14} className="mr-1" />
-              QR
-            </Button>
-            
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={medicine.expired}
-              onClick={() => handleTagExpired(medicine.id)}
-              className={`h-8 ${
-                medicine.expired ? 'opacity-50 cursor-not-allowed' : 'text-yellow-400 hover:text-yellow-300'
-              }`}
-            >
-              <AlertTriangle size={14} className="mr-1" />
-              {medicine.expired ? 'Tagged' : 'Tag'}
-            </Button>
-          </div>
-        );
-      },
+      id: '3',
+      name: 'Amoxicillin',
+      batchNumber: '54321',
+      expiryDate: '2024-05-20',
+      ipfsHash: '',
+      expired: false,
     },
   ];
 
+  const [results, setResults] = useState(hardcodedData); // Use hardcoded data as the initial state
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Handle search operation
+  const handleSearch = () => {
+    const filteredResults = hardcodedData.filter(
+      (medicine) =>
+        medicine.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        medicine.batchNumber.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+    setResults(filteredResults);
+  };
+
   return (
-    <div className="container mx-auto animate-fade-in">
+    <div className="container mx-auto">
       <div className="mb-6">
         <h1 className="text-2xl font-bold mb-2">Search Medicines</h1>
         <p className="text-muted-foreground">
           Search for medicines by name, batch number, or manufacturer
         </p>
       </div>
-      
+
       <div className="glass-morphism p-4 rounded-lg mb-6">
         <div className="flex flex-col sm:flex-row gap-3">
           <Input
@@ -164,11 +70,45 @@ const SearchMedicines: React.FC = () => {
           </Button>
         </div>
       </div>
-      
-      <DataTable
-        columns={columns}
-        data={results}
-      />
+
+      {/* Table to display medicines */}
+      <div className="overflow-x-auto">
+        <table className="table-auto w-full border-collapse border border-gray-200">
+          <thead>
+            <tr className="bg-gray-100">
+              <th className="border border-gray-300 px-4 py-2">Medicine Name</th>
+              <th className="border border-gray-300 px-4 py-2">Batch Number</th>
+              <th className="border border-gray-300 px-4 py-2">Expiry Date</th>
+              <th className="border border-gray-300 px-4 py-2">IPFS Hash</th>
+              <th className="border border-gray-300 px-4 py-2">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {results.map((medicine) => {
+              const isExpired = new Date(medicine.expiryDate) < new Date();
+              return (
+                <tr key={medicine.id} className="hover:bg-gray-50">
+                  <td className="border border-gray-300 px-4 py-2">{medicine.name}</td>
+                  <td className="border border-gray-300 px-4 py-2">{medicine.batchNumber}</td>
+                  <td className="border border-gray-300 px-4 py-2">
+                    {format(new Date(medicine.expiryDate), 'MMM d, yyyy')}
+                  </td>
+                  <td className="border border-gray-300 px-4 py-2">
+                    {medicine.ipfsHash || 'Not uploaded'}
+                  </td>
+                  <td className="border border-gray-300 px-4 py-2">
+                    {isExpired ? (
+                      <span className="text-red-500">Expired</span>
+                    ) : (
+                      <span className="text-green-500">Valid</span>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };

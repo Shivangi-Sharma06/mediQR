@@ -37,12 +37,14 @@ const AdminDashboard: React.FC = () => {
   
   return (
     <div className="container mx-auto animate-fade-in">
-      <div className="flex flex-col items-start mb-8">
-        <h1 className="text-3xl font-bold mb-2">Welcome to MediChain</h1>
-        <p className="text-muted-foreground">
-          Dashboard overview of your blockchain medicine authentication system
-        </p>
-      </div>
+                        <div className="flex flex-col items-start mb-8">
+              <h1 className="text-4xl md:text-5xl font-extrabold text-primary drop-shadow-lg mb-2">
+                Welcome to MediQR
+              </h1>
+              <p className="text-lg md:text-xl text-muted-foreground">
+                Dashboard overview of your blockchain medicine authentication system
+              </p>
+            </div>
       
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {stats.map((stat, index) => (
