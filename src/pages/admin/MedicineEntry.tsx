@@ -1,30 +1,19 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { format } from 'date-fns';
-import { useToast } from '@/hooks/use-toast';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
-import { CalendarIcon, Loader2 } from 'lucide-react';
-import { QRDisplay } from '@/components/ui/qr-display';
-import { create } from 'ipfs-http-client';
-
-
-type Medicine = {
-  id: string; // Unique identifier
-  createdAt: Date; // Date object
-  name: string;
-  batchNumber: string;
-  expiryDate: string; // ISO format string
-  manufacturer: string;
-  qrCode: string; // Base64 or URL for the QR code
-  ipfsHash?: string; // IPFS hash for the QR code
-};
+import { CalendarIcon } from 'lucide-react';
+import QRCode from 'qrcode';
+import { db } from '@/lib/firebase';
+import { collection, addDoc, getDocs, query, where } from 'firebase/firestore';
+import { create } from 'ipfs-http-client'; // Import IPFS client
 
 const formSchema = z.object({
   name: z.string().min(1, "Medicine name is required"),
@@ -36,9 +25,14 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>;
 
 const MedicineEntry: React.FC = () => {
-  const { toast } = useToast();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submittedMedicine, setSubmittedMedicine] = useState<Medicine | null>(null);
+  const [qrCodeUrl, setQrCodeUrl] = useState<string | null>(null);
+  const [submittedData, setSubmittedData] = useState<FormData | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [ipfsHash, setIpfsHash] = useState<string | null>(null); // State to store IPFS hash
+  const qrCanvasRef = useRef<HTMLCanvasElement | null>(null);
+
+  const ipfsClient = create({ url: 'https://ipfs.infura.io:5001/api/v0' }); // Initialize IPFS client
 
   const {
     register,
@@ -59,53 +53,71 @@ const MedicineEntry: React.FC = () => {
   const selectedDate = watch('expiryDate');
 
   const onSubmit = async (data: FormData) => {
-    setIsSubmitting(true);
+    setIsLoading(true);
+    setError(null);
 
-    const qrCodeData = `Name: ${data.name}\nBatch: ${data.batchNumber}`;
-    const qrCodeUrl = await generateQRCode(qrCodeData); // Generate QR code URL
-
-    const ipfsHash = await uploadToIPFS(qrCodeUrl); // Upload QR code to IPFS
-
-    const medicineData: Medicine = {
-      id: crypto.randomUUID(), // Generate a unique ID
-      createdAt: new Date(), // Current timestamp
-      name: data.name,
-      batchNumber: data.batchNumber,
-      expiryDate: data.expiryDate.toISOString(),
-      manufacturer: data.manufacturerAddress,
-      qrCode: qrCodeUrl,
-      ipfsHash, // Store the IPFS hash
-    };
-
-    setSubmittedMedicine(medicineData);
-
-    toast({
-      title: "Medicine Submitted",
-      description: "QR Code generated and uploaded to IPFS.",
-    });
-
-    reset();
-    setIsSubmitting(false);
-  };
-
-  const generateQRCode = async (data: string): Promise<string> => {
-    const QRCode = await import('qrcode');
-    return QRCode.toDataURL(data);
-  };
-
-  const uploadToIPFS = async (qrCode: string): Promise<string> => {
     try {
-      const client = create({ url: 'https://ipfs.infura.io:5001/api/v0' }); // Connect to IPFS
-      const result = await client.add(qrCode); // Upload QR code to IPFS
-      return result.path; // Return the IPFS hash
-    } catch (error) {
-      console.error("Error uploading to IPFS:", error);
-      toast({
-        title: "IPFS Upload Failed",
-        description: "An error occurred while uploading the QR code to IPFS.",
-        variant: "destructive",
+      // Check for duplicate batch number
+      const q = query(collection(db, 'medicines'), where('batchNumber', '==', data.batchNumber));
+      const querySnapshot = await getDocs(q);
+      if (!querySnapshot.empty) {
+        setError("Batch number already exists. Please use a unique batch number.");
+        setIsLoading(false);
+        return;
+      }
+
+      const qrData = `Manufacturer: ${data.manufacturerAddress}\nMedicine: ${data.name}\nBatch: ${data.batchNumber}`;
+
+      // Generate QR Code on canvas
+      if (qrCanvasRef.current) {
+        QRCode.toCanvas(qrCanvasRef.current, qrData, (error) => {
+          if (error) console.error("Error generating QR code:", error);
+        });
+      }
+
+      // Generate QR Code as URL
+      const qrCodeUrl = await QRCode.toDataURL(qrData);
+      setQrCodeUrl(qrCodeUrl);
+
+      // Save data to Firestore
+      await addDoc(collection(db, 'medicines'), {
+        ...data,
+        expiryDate: data.expiryDate.toISOString(),
+        qrData,
+        createdAt: new Date().toISOString(),
       });
-      throw error;
+
+      setSubmittedData(data);
+      reset();
+    } catch (err) {
+      console.error("Submission error:", err);
+      setError("An error occurred while submitting the form.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const uploadToIPFS = async () => {
+    if (!qrCodeUrl) {
+      setError("QR Code is not generated yet.");
+      return;
+    }
+
+    try {
+      const response = await fetch(qrCodeUrl); // Fetch the QR code as a blob
+      const blob = await response.blob();
+      const file = new File([blob], `QR_${submittedData?.name}_${submittedData?.batchNumber}.png`, {
+        type: 'image/png',
+      });
+
+      const result = await ipfsClient.add(file); // Upload to IPFS
+      setIpfsHash(result.path); // Store the IPFS hash
+      setError(null);
+
+      console.log("Uploaded to IPFS:", result.path);
+    } catch (err) {
+      console.error("Error uploading to IPFS:", err);
+      setError("Failed to upload QR Code to IPFS.");
     }
   };
 
@@ -114,12 +126,11 @@ const MedicineEntry: React.FC = () => {
       <Card className="glass-morphism p-6 sm:p-8 rounded-xl">
         <div className="mb-6">
           <h1 className="text-2xl font-bold mb-2">Add New Medicine</h1>
-          <p className="text-muted-foreground">Fill in the form to submit medicine information.</p>
+          <p className="text-muted-foreground">Fill in the form to generate a QR code.</p>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="space-y-5">
-            {/* Name */}
             <div className="space-y-2">
               <label htmlFor="name" className="text-sm font-medium">Medicine Name</label>
               <Input
@@ -131,7 +142,6 @@ const MedicineEntry: React.FC = () => {
               {errors.name && <p className="text-red-500 text-xs">{errors.name.message}</p>}
             </div>
 
-            {/* Batch Number */}
             <div className="space-y-2">
               <label htmlFor="batchNumber" className="text-sm font-medium">Batch Number</label>
               <Input
@@ -143,7 +153,6 @@ const MedicineEntry: React.FC = () => {
               {errors.batchNumber && <p className="text-red-500 text-xs">{errors.batchNumber.message}</p>}
             </div>
 
-            {/* Expiry Date */}
             <div className="space-y-2">
               <label htmlFor="expiryDate" className="text-sm font-medium">Expiry Date</label>
               <Popover>
@@ -173,7 +182,6 @@ const MedicineEntry: React.FC = () => {
               {errors.expiryDate && <p className="text-red-500 text-xs">{errors.expiryDate.message}</p>}
             </div>
 
-            {/* Manufacturer Address */}
             <div className="space-y-2">
               <label htmlFor="manufacturerAddress" className="text-sm font-medium">Manufacturer Address</label>
               <Input
@@ -187,28 +195,55 @@ const MedicineEntry: React.FC = () => {
               )}
             </div>
 
-            {/* Submit */}
+            {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+
             <Button
               type="submit"
               className="w-full bg-gradient-to-r from-primary/80 to-accent/80 hover:from-primary hover:to-accent"
-              disabled={isSubmitting}
+              disabled={isLoading}
             >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Submitting...
-                </>
-              ) : (
-                "Submit Medicine Data"
-              )}
+              {isLoading ? 'Generating...' : 'Generate QR Code'}
             </Button>
           </div>
         </form>
 
-        {/* QR Code Section */}
-        {submittedMedicine && (
-          <div className="mt-10">
-            <QRDisplay medicine={{ ...submittedMedicine, expiryDate: new Date(submittedMedicine.expiryDate) }} />
+        {qrCodeUrl && (
+          <div className="mt-6 text-center">
+            <h2 className="text-lg font-medium mb-4">Generated QR Code</h2>
+            <canvas ref={qrCanvasRef} className="mx-auto mb-4" />
+            <img src={qrCodeUrl} alt="Generated QR Code" className="mx-auto mb-4" />
+            <div className="flex justify-center gap-4">
+              <a href={qrCodeUrl} download={`QR_${submittedData?.name}_${submittedData?.batchNumber}.png`}>
+                <Button variant="outline" className="mb-4">Download QR Code</Button>
+              </a>
+              <Button variant="outline" className="mb-4" onClick={uploadToIPFS}>
+                Upload QR to IPFS
+              </Button>
+            </div>
+            {ipfsHash && (
+              <div className="mt-4">
+                <p className="text-sm">
+                  <strong>IPFS Hash:</strong> {ipfsHash}
+                </p>
+                <p className="text-sm">
+                  <a
+                    href={`https://ipfs.io/ipfs/${ipfsHash}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-500 underline"
+                  >
+                    View on IPFS
+                  </a>
+                </p>
+              </div>
+            )}
+            {submittedData && (
+              <div className="mt-4">
+                <p className="text-sm"><strong>Medicine Name:</strong> {submittedData.name}</p>
+                <p className="text-sm"><strong>Batch Number:</strong> {submittedData.batchNumber}</p>
+                <p className="text-sm"><strong>Manufacturer:</strong> {submittedData.manufacturerAddress}</p>
+              </div>
+            )}
           </div>
         )}
       </Card>
