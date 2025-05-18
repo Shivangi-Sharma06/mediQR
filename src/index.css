@@ -1,0 +1,91 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&family=Poppins:wght@300;400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+
+    --primary: 265 84% 61%;
+    --primary-foreground: 0 0% 98%;
+
+    --secondary: 217 91.2% 59.8%;
+    --secondary-foreground: 0 0% 98%;
+
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+
+    --accent: 179 89% 47%;
+    --accent-foreground: 0 0% 98%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 240 4.9% 83.9%;
+
+    --radius: 0.5rem;
+
+    --sidebar-background: 240 5% 8%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 265 84% 61%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 5.9% 10%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-mediqr-dark text-foreground font-poppins;
+    background-image: 
+      radial-gradient(circle at 15% 50%, rgba(139, 92, 246, 0.05), transparent 25%),
+      radial-gradient(circle at 85% 30%, rgba(59, 130, 246, 0.05), transparent 25%);
+    background-size: 100% 100%;
+  }
+}
+
+@layer components {
+  .hex-pattern {
+    position: relative;
+    overflow: hidden;
+  }
+  .hex-pattern::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0l25.98 15v30L30 60 4.02 45V15z' stroke-width='1' stroke='%238B5CF6' fill='none' fill-opacity='0.05' stroke-opacity='0.1'/%3E%3C/svg%3E");
+    opacity: 0.4;
+    z-index: -1;
+  }
+
+  .glow-border {
+    box-shadow: 0 0 10px 0 rgba(139, 92, 246, 0.3);
+  }
+
+  .grid-pattern {
+    background-image: linear-gradient(rgba(139, 92, 246, 0.1) 1px, transparent 1px), 
+                      linear-gradient(90deg, rgba(139, 92, 246, 0.1) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+}

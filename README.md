@@ -1,86 +1,73 @@
-# 🛡️💊 Blockchain-Based Medicine Authenticity Checker 💊🛡️
+# Welcome to your Lovable project
 
-------
+## Project info
 
+**URL**: https://lovable.dev/projects/676b16d2-c4d0-4a39-9c68-8f90a12b57b5
 
+## How can I edit this code?
 
-## 🚨 Problem 🚨
+There are several ways of editing your application.
 
-- **Risk of Fake Medicines**: Fake medicines pose serious health risks and can undermine treatments.
-- **Targeted Expensive Medicines**: High-cost and rare medicines are often substituted or counterfeited.
-- **Lack of Verification**: There's insufficient oversight to confirm the authenticity of such medicines.
-- **Ensuring Authenticity**: Medicines from trusted producers should be checked for tampering during transit.
-- **Seal Checking Limitations**: Checking the seal is a common method, but seals can be easily tampered with, demanding more robust safeguards.
+**Use Lovable**
 
----
+Simply visit the [Lovable Project](https://lovable.dev/projects/676b16d2-c4d0-4a39-9c68-8f90a12b57b5) and start prompting.
 
-## ✅ Solution ✅
+Changes made via Lovable will be committed automatically to this repo.
 
-- **Unique QR Code for Medicines**: 
-  - Each batch of medicine will have a unique QR code.
-  - The QR code will include details such as the manufacturer's crypto wallet address, the medicine name, and the batch number.
+**Use your preferred IDE**
 
-- **Blockchain Integration**: 
-  - The QR code data will be securely stored on the InterPlanetary File System (IPFS) using blockchain technology, ensuring immutability and authenticity.
+If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
 
-- **Supply Chain Tracking**: 
-  - A supply chain system will track the movement of medicines, allowing visibility of their journey from manufacturing to delivery.
-  - This ensures that the origin and transit of the medicine can be easily identified.
+The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
 
-- **Verification by Users**: 
-  - When a user scans the QR code, they can immediately verify its authenticity through the embedded data.
-  - This process will help determine if the medicine is genuine or counterfeit.
+Follow these steps:
 
----
+```sh
+# Step 1: Clone the repository using the project's Git URL.
+git clone <YOUR_GIT_URL>
 
-## ✨ Features ✨
+# Step 2: Navigate to the project directory.
+cd <YOUR_PROJECT_NAME>
 
-**1. 🏢 Admin Panel (Pharma Company) 🏢**
-- 📝 Medicine entry form (name, batch, expiry).
-- ➕ Generate QR code with a download option.
-- ⬇️ A button to upload the QR code to IPFS like pinata.
-- 📊 View all updated records.
-The admin dashboard will also reflect the IPFS hash of the QR code along with the date and time. The notifications will also be available to know if the particular transaction was successful or not.
+# Step 3: Install the necessary dependencies.
+npm i
 
-**2. 🏥 User Interface (Pharmacist/Store) 🏥**
-- 📷 Scan QR code.
-- ℹ️ Fetch and display details.
-- ✅/❌ Display: Genuine/Not Genuine
+# Step 4: Start the development server with auto-reloading and an instant preview.
+npm run dev
+```
 
-**3. 🔗 Blockchain Integration 🔗**
-- 🚫 Prevents off-chain tampering
+**Edit a file directly in GitHub**
 
----
+- Navigate to the desired file(s).
+- Click the "Edit" button (pencil icon) at the top right of the file view.
+- Make your changes and commit the changes.
 
-## 📊 Market Research 📊
+**Use GitHub Codespaces**
 
-1. 💊The Indian drug market has the valuation of more than 200 Billion Rupees.
-2. 🌍 1 in 10 medicines in developing countries are substandard
-3. 📈 Extensive Pharma Demand
+- Navigate to the main page of your repository.
+- Click on the "Code" button (green button) near the top right.
+- Select the "Codespaces" tab.
+- Click on "New codespace" to launch a new Codespace environment.
+- Edit files directly within the Codespace and commit and push your changes once you're done.
 
+## What technologies are used for this project?
 
----
+This project is built with:
 
-## 🚧 Currently In Development Phase
-The following features have been added-:
-- function to connect crytpo wallet of the manufacturer.
-- a unique QR code is being generated which reflects the metadata when scanned.
-- The function to scan QR code in the users dashboard and to see the scanned QR code to check its authenticity.
+- Vite
+- TypeScript
+- React
+- shadcn-ui
+- Tailwind CSS
 
-The following features are yet to be implemented -:
-- the storage on IPFS.
-- the functioning of supply chain model.
-- the storage of from data on manufacturer for later access.
-- authentication system for the admin to facilitate login and logout features.
+## How can I deploy this project?
 
----
+Simply open [Lovable](https://lovable.dev/projects/676b16d2-c4d0-4a39-9c68-8f90a12b57b5) and click on Share -> Publish.
 
+## Can I connect a custom domain to my Lovable project?
 
-## 🛠️ Tech Stack 🛠️
+Yes, you can!
 
-- Front-end: ReactJS/Vite 🖼️
-- Back-end: NodeJS/FastAPI ⚙️
-- Database: Firebase/MongoDB 🗄️
-- QR code: qrcode npm package 🔳
-- IPFS: Pinata ☁️
-- Blockchain: Solidity, Ethers.js, Hardhat, ERC1155 contract 🔗
+To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+
+Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
