@@ -11,7 +11,7 @@ const QRScanner: React.FC = () => {
   const [medicineData, setMedicineData] = useState<{
     name: string;
     batchNumber: string;
-    expiryDate: string;
+    manufacturerAddress: string;
     ipfsHash: string;
   } | null>(null);
 
@@ -34,7 +34,7 @@ const QRScanner: React.FC = () => {
           setMedicineData({
             name: 'Amoxicillin 500mg',
             batchNumber: 'AMX-2024-001',
-            expiryDate: '2025-06-15',
+            manufacturerAddress: '2025-06-15',
             ipfsHash: 'QmT8XYZ...123abc'
           });
           toast.success("Medicine verification successful!");
@@ -118,7 +118,7 @@ const QRScanner: React.FC = () => {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-white/60">Expiry Date:</span>
-                  <span className="font-medium text-white/90">{medicineData.expiryDate}</span>
+                  <span className="font-medium text-white/90">{medicineData.manufacturerAddress}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-white/60">IPFS Hash:</span>

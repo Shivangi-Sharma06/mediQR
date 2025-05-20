@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.0;
 
-contract MediQR {
+contract mediQR {
     struct Medicine {
         string medname;
         string batchNo;

@@ -55,19 +55,6 @@ const Sidebar: React.FC = () => {
           })}
         </nav>
       </div>
-      <div className="p-4 mt-8">
-        <div className="relative p-4 rounded-lg overflow-hidden">
-          <div className="absolute inset-0 opacity-20 bg-gradient-to-br from-mediqr-primary to-mediqr-accent"></div>
-          <div className="relative">
-            <h3 className="text-sm font-semibold text-white mb-1">New to mediQR?</h3>
-            <p className="text-xs text-white/70 mb-3">Check our documentation for help</p>
-            <a href="#" className="text-xs inline-flex items-center text-mediqr-accent hover:underline">
-              Read docs
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-1"><path d="m9 18 6-6-6-6"/></svg>
-            </a>
-          </div>
-        </div>
-      </div>
     </aside>
   );
 };

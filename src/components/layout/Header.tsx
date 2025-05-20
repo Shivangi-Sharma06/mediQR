@@ -20,15 +20,6 @@ const Header: React.FC = () => {
             medi<span className="text-mediqr-primary">QR</span>
           </span>
         </Link>
-        <div className="flex items-center space-x-4">
-          <nav className="hidden md:flex space-x-6">
-            <Link to="/admin" className="text-sm font-medium text-white/80 hover:text-white transition-colors">
-              Admin
-            </Link>
-            <Link to="/verify" className="text-sm font-medium text-white/80 hover:text-white transition-colors">
-              Verify
-            </Link>
-          </nav>
           <Button 
             variant="outline" 
             className={`font-orbitron text-xs group relative overflow-hidden ${isConnected ? 'border-mediqr-success' : 'border-mediqr-accent hover:border-mediqr-highlight'}`}
@@ -39,7 +30,6 @@ const Header: React.FC = () => {
             </span>
             <span className={`absolute inset-0 bg-gradient-to-r ${isConnected ? 'from-green-600/20 to-green-500/20' : 'from-mediqr-accent/20 to-mediqr-highlight/20'} transform origin-left transition-transform duration-300 scale-x-0 group-hover:scale-x-100`}></span>
           </Button>
-        </div>
       </div>
     </header>
   );
