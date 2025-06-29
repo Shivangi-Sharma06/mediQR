@@ -1,23 +1,33 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { toast } from "sonner";
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Loader2 } from 'lucide-react';
-// ...existing imports...
 import QRCode from 'qrcode';
 
-const MedicineForm: React.FC = () => {
+interface MedicineFormProps {
+  walletAddress: string | null;
+}
+
+const MedicineForm: React.FC<MedicineFormProps> = ({ walletAddress }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     batchNumber: '',
-    manufacturerAddress: '',
+    manufacturerAddress: walletAddress || '',
     expiryDate: ''
   });
   const [qrGenerated, setQrGenerated] = useState(false);
-  const [qrUrl, setQrUrl] = useState<string | null>(null); // <-- Add this state
+  const [qrUrl, setQrUrl] = useState<string | null>(null);
+
+  // Update manufacturerAddress if walletAddress changes
+  useEffect(() => {
+    setFormData(prev => ({
+      ...prev,
+      manufacturerAddress: walletAddress || ''
+    }));
+  }, [walletAddress]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -41,7 +51,7 @@ const MedicineForm: React.FC = () => {
     setIsLoading(false);
   };
 
-    const handleDownloadQR = () => {
+  const handleDownloadQR = () => {
     if (!qrUrl) return;
     const link = document.createElement('a');
     link.href = qrUrl;
@@ -51,8 +61,6 @@ const MedicineForm: React.FC = () => {
     document.body.removeChild(link); // Clean up
     toast.success("QR code downloaded successfully");
   };
-
-  // ...handleUploadIPFS remains unchanged...
 
   // Dummy implementation for handleUploadIPFS to resolve the error
   const handleUploadIPFS = () => {
@@ -69,7 +77,6 @@ const MedicineForm: React.FC = () => {
       <form onSubmit={handleSubmit} className="space-y-4 bg-mediqr-darker/50 p-6 rounded-lg border border-muted/20 relative overflow-hidden">
         <div className="hex-pattern absolute inset-0"></div>
         <div className="relative z-10 space-y-4">
-          {/* ...form fields... */}
           <div className="space-y-2">
             <Label htmlFor="name">Medicine Name</Label>
             <Input 
@@ -95,20 +102,20 @@ const MedicineForm: React.FC = () => {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="manufacturerAddress">manufacturerAddress</Label>
+            <Label htmlFor="manufacturerAddress">Manufacturer Address</Label>
             <Input 
               id="manufacturerAddress"
               name="manufacturerAddress"
-              type="string"
-              placeholder="Enter manufacturer address"
+              type="text"
+              placeholder="Connect wallet to autofill"
               className="bg-black/20 border-muted/30 focus:border-mediqr-primary"
               value={formData.manufacturerAddress}
-              onChange={handleChange}
+              readOnly // Make it read-only
               required
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="expiryDate">expiryDate</Label>
+            <Label htmlFor="expiryDate">Expiry Date</Label>
             <Input 
               id="expiryDate"
               name="expiryDate"

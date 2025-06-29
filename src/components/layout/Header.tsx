@@ -3,14 +3,19 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Shield } from 'lucide-react';
 
-const Header: React.FC = () => {
-  const [account, setAccount] = React.useState<string | null>(null);
+interface HeaderProps {
+  setAccount: (acc: string | null) => void;
+}
+
+const Header: React.FC<HeaderProps> = ({ setAccount }) => {
+  const [account, setLocalAccount] = React.useState<string | null>(null);
 
   const handleConnectWallet = async () => {
     if ((window as any).ethereum) {
       try {
         const accounts = await (window as any).ethereum.request({ method: 'eth_requestAccounts' });
-        setAccount(accounts[0]);
+        setLocalAccount(accounts[0]);
+        setAccount(accounts[0]); // Pass to parent
       } catch (error) {
         console.error('User rejected the request or there was an error:', error);
       }
@@ -20,7 +25,8 @@ const Header: React.FC = () => {
   };
 
   const handleDisconnectWallet = () => {
-    setAccount(null);
+    setLocalAccount(null);
+    setAccount(null); // Pass to parent
   };
 
   return (
