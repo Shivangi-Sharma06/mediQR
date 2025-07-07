@@ -20,6 +20,7 @@ const MedicineForm: React.FC<MedicineFormProps> = ({ walletAddress }) => {
   });
   const [qrGenerated, setQrGenerated] = useState(false);
   const [qrUrl, setQrUrl] = useState<string | null>(null);
+  const [ipfsHash, setIpfsHash] = useState<string | null>(null); // NEW STATE
 
   // Update manufacturerAddress if walletAddress changes
   useEffect(() => {
@@ -62,9 +63,26 @@ const MedicineForm: React.FC<MedicineFormProps> = ({ walletAddress }) => {
     toast.success("QR code downloaded successfully");
   };
 
-  // Dummy implementation for handleUploadIPFS to resolve the error
-  const handleUploadIPFS = () => {
-    toast.info("Upload to IPFS functionality not implemented yet.");
+  const handleUploadIPFS = async () => {
+    if (!qrUrl) return;
+    setIsLoading(true);
+    try {
+      const response = await fetch('http://localhost:5000/api/upload-ipfs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image: qrUrl }),
+      });
+      const data = await response.json();
+      if (data.ipfsHash) {
+        setIpfsHash(data.ipfsHash); // SET THE HASH HERE
+        toast.success(`Uploaded! IPFS Hash: ${data.ipfsHash}`);
+      } else {
+        toast.error('Failed to upload to IPFS');
+      }
+    } catch (err) {
+      toast.error('Error uploading to IPFS');
+    }
+    setIsLoading(false);
   };
 
   return (
@@ -193,6 +211,12 @@ const MedicineForm: React.FC<MedicineFormProps> = ({ walletAddress }) => {
                   "Upload to IPFS"
                 )}
               </Button>
+              {/* Show IPFS hash below the button if available */}
+              {ipfsHash && (
+                <div className="mt-4 text-white text-sm break-all">
+                  <strong>IPFS Hash:</strong> {ipfsHash}
+                </div>
+              )}
             </div>
           )}
         </div>
