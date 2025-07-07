@@ -35,6 +35,7 @@ app.post('/api/upload-ipfs', async (req, res) => {
   const buffer = Buffer.from(matches[2], 'base64');
 
   // Convert buffer to stream
+  // buffer pinata nhi leta, chunks mein chahiye h 
   const stream = Readable.from(buffer);
 
   try {
