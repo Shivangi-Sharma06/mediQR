@@ -63,18 +63,24 @@ const MedicineForm: React.FC<MedicineFormProps> = ({ walletAddress }) => {
     toast.success("QR code downloaded successfully");
   };
 
-  const handleUploadIPFS = async () => {
+    const handleUploadIPFS = async () => {
     if (!qrUrl) return;
     setIsLoading(true);
     try {
       const response = await fetch('http://localhost:5000/api/upload-ipfs', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ image: qrUrl }),
+        body: JSON.stringify({
+          image: qrUrl,
+          name: formData.name,
+          batchNumber: formData.batchNumber,
+          manufacturerAddress: formData.manufacturerAddress,
+          expiryDate: formData.expiryDate
+        }),
       });
       const data = await response.json();
       if (data.ipfsHash) {
-        setIpfsHash(data.ipfsHash); // SET THE HASH HERE
+        setIpfsHash(data.ipfsHash);
         toast.success(`Uploaded! IPFS Hash: ${data.ipfsHash}`);
       } else {
         toast.error('Failed to upload to IPFS');
@@ -84,6 +90,9 @@ const MedicineForm: React.FC<MedicineFormProps> = ({ walletAddress }) => {
     }
     setIsLoading(false);
   };
+
+
+
 
   return (
     <div className="space-y-6 max-w-md mx-auto">
