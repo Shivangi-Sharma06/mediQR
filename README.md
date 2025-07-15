@@ -72,8 +72,11 @@ npm run dev
 Create a .env in your backend/ folder:
 
 PINATA_API_KEY=YOUR_PINATA_API_KEY
+
 PINATA_SECRET_API_KEY=YOUR_PINATA_SECRET_API_KEY
+
 MONGO_URI=YOUR_MONGO_DB_URI
+
 PORT=5000
 
 # ✨ Status
