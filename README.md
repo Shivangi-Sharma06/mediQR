@@ -89,4 +89,4 @@ Authentication & extra enhancements coming soon! 🔒
 
 Let’s fight counterfeit together! 🚀
 
-~ Shivangi Sharma 🫶
+~ Shivangi Sharma and Manvi Maheshwari🫶
